@@ -9,10 +9,10 @@ import threading
 import re
 
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', filename='app.log', filemode='w')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', filename='app.log', filemode='w', encoding='utf-8')
 
 # Set up OpenAI API key
-openai.api_key = "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"
+openai.api_key = "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"
 
 # Connect to the SQLite database
 conn = sqlite3.connect('synonyms.db')
@@ -46,7 +46,7 @@ word_batches = list(batch_generator(word_data, 2))
 def verify_synonyms(word, synonyms_list):
     try:
         completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo-16k-0613",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": "Linguist."},
                 {"role": "user", "content": f"Examine and refine the list {synonyms_list} for Vietnamese synonyms of the Vietnamese word \"{word}\". Return the verified synonyms sorted by confidence level from high to low, strictly in this format: 'Verified:[comma-separated-synonyms]'. Exclude the word \"{word}\" itself from the results. The correct synonyms must be in Vietnamese. If none are verified, reply with ['Không tìm thấy']. No additional comments or text allowed."}  

@@ -3,10 +3,7 @@ import openai
 import time
 from apscheduler.schedulers.blocking import BlockingScheduler
 import logging
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.interval import IntervalTrigger
 import threading
-import re
 
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', filename='app.log', filemode='w', encoding='utf-8')
@@ -40,7 +37,7 @@ def batch_generator(lst, n):
         yield lst[i:i + n]
 
 # Create word batches
-word_batches = list(batch_generator(word_data, 2))
+word_batches = list(batch_generator(word_data, 50))
 
 # Function to verify synonyms using GPT-3
 def verify_synonyms(word, synonyms_list):
@@ -53,6 +50,7 @@ def verify_synonyms(word, synonyms_list):
             ]
         )
         output = str(completion.choices[0].message['content']).encode('utf-8')
+        logging.debug(f"API Response: {output}")
         output = output.decode('utf-8') 
         # Extract the part after 'Verified:' and split it into a list of synonyms
         if 'Verified:' in output:
@@ -60,7 +58,7 @@ def verify_synonyms(word, synonyms_list):
             return verified_synonyms
 
     except Exception as e:
-        logging.info(f"Error processing word: {word} - {str(e)}")
+        logging.exception(f"Error processing word: {word} - {str(e)}")
         return None
 
 
@@ -77,9 +75,9 @@ def update_database(word, synonyms):
     local_conn.commit()
     local_conn.close()
 # Global variable to keep track of the next batch to process
-next_batch_index = 41
+next_batch_index = 40
 
-max_batches = 51  # New global variable to limit the number of batches
+max_batches = 60  # New global variable to limit the number of batches
 
 # Create an APScheduler instance
 scheduler = BlockingScheduler()
@@ -89,7 +87,7 @@ def shutdown_scheduler():
 
 # Define a function to process the next batch
 def process_next_batch():
-    logging.info("process_next_batch called")
+    # logging.info("process_next_batch called")
     global next_batch_index
     global all_batches_processed  # Access the global variable
 
@@ -98,13 +96,14 @@ def process_next_batch():
         logging.info(f"Processing batch {next_batch_index + 1}")
         for word, synonyms_list in batch:
             synonyms_list = synonyms_list.lstrip(', ')  # Removing leading commas and spaces
+            logging.debug(f"Word: {word}, Synonyms List: {synonyms_list}") # Logging synonyms sent for validation
             synonyms = verify_synonyms(word, synonyms_list)
             if synonyms:
-                logging.info(f"Word: {word}, Synonyms: {', '.join(synonyms)}")
+                logging.info(f"Word: {word}, Synonyms: {', '.join(synonyms)}") # Logging verified synonyms
                 update_database(word, synonyms)  # Update the database with verified synonyms
             else:
                 logging.info(f"Error processing word: {word}")
-            time.sleep(19)  # 20-second delay between each API call
+            time.sleep(6)  # 4-second delay between each API call
         next_batch_index += 1  # Increment the batch index for the next run
     else:
         logging.info("All batches processed")
@@ -115,7 +114,7 @@ def process_next_batch():
 
 def main():
     # Schedule the process_next_batch function to run at specified intervals
-    scheduler.add_job(process_next_batch, 'interval', minutes=1, id='process_next_batch', max_instances=1)
+    scheduler.add_job(process_next_batch, 'interval', seconds=20, id='process_next_batch', max_instances=1)
 
     # Start the scheduler
     try:

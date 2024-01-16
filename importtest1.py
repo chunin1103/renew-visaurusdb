@@ -9,7 +9,7 @@ import threading
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', filename='app.log', filemode='w', encoding='utf-8')
 
 # Set up OpenAI API key
-openai.api_key = "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"
+openai.api_key = "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"
 
 # Connect to the SQLite database
 conn = sqlite3.connect('synonyms.db')
@@ -37,7 +37,7 @@ def batch_generator(lst, n):
         yield lst[i:i + n]
 
 # Create word batches
-word_batches = list(batch_generator(word_data, 50))
+word_batches = list(batch_generator(word_data, 41))
 
 # Function to verify synonyms using GPT-3
 def verify_synonyms(word, synonyms_list):
@@ -46,7 +46,7 @@ def verify_synonyms(word, synonyms_list):
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "Linguist."},
-                {"role": "user", "content": f"Examine and refine the list {synonyms_list} for Vietnamese synonyms of the Vietnamese word \"{word}\". Return the verified synonyms sorted by confidence level from high to low, strictly in this format: 'Verified:[comma-separated-synonyms]'. Exclude the word \"{word}\" itself from the results. The correct synonyms must be in Vietnamese. If none are verified, reply with ['Không tìm thấy']. No additional comments or text allowed."}  
+                {"role": "user", "content": f"Examine and refine the following list of potential synonyms for the Vietnamese word \"{word}\": [{synonyms_list}]. The first priority is to verify and sort the synonyms based on their closeness in meaning to the primary word. Ensure all terms are Vietnamese, including those borrowed from other languages but written in the Latin script. Assess each term's relevance as a synonym, considering their meanings and context-specific usage in Vietnamese. If confident, you may also suggest additional Vietnamese synonyms not listed. Exclude the primary word \"{word}\" itself from the final list. Return the refined list in this format: 'Verified:[comma-separated synonyms]'. If no appropriate Vietnamese synonyms are found, reply with ['Không tìm thấy']. No additional comments or text allowed."}  
             ]
         )
         output = str(completion.choices[0].message['content']).encode('utf-8')
@@ -75,9 +75,9 @@ def update_database(word, synonyms):
     local_conn.commit()
     local_conn.close()
 # Global variable to keep track of the next batch to process
-next_batch_index = 40
+next_batch_index = 325
 
-max_batches = 60  # New global variable to limit the number of batches
+max_batches = 900  # New global variable to limit the number of batches
 
 # Create an APScheduler instance
 scheduler = BlockingScheduler()
@@ -103,7 +103,7 @@ def process_next_batch():
                 update_database(word, synonyms)  # Update the database with verified synonyms
             else:
                 logging.info(f"Error processing word: {word}")
-            time.sleep(6)  # 4-second delay between each API call
+            time.sleep(7)  # 6-second delay between each API call
         next_batch_index += 1  # Increment the batch index for the next run
     else:
         logging.info("All batches processed")
@@ -114,7 +114,7 @@ def process_next_batch():
 
 def main():
     # Schedule the process_next_batch function to run at specified intervals
-    scheduler.add_job(process_next_batch, 'interval', seconds=20, id='process_next_batch', max_instances=1)
+    scheduler.add_job(process_next_batch, 'interval', seconds=15, id='process_next_batch', max_instances=1)
 
     # Start the scheduler
     try:

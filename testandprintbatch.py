@@ -38,7 +38,7 @@ def batch_generator(lst, n):
         yield lst[i:i + n]
 
 # Create word batches
-word_batches = list(batch_generator(word_data, 50))
+word_batches = list(batch_generator(word_data, 41))
 
 # Function to verify synonyms using GPT-3
 def verify_synonyms(word, synonyms_list):
@@ -76,9 +76,9 @@ def update_database(word, synonyms):
     local_conn.commit()
     local_conn.close()
 # Global variable to keep track of the next batch to process
-next_batch_index = 20
+next_batch_index = 325
 
-max_batches = 40  # New global variable to limit the number of batches
+max_batches = 500  # New global variable to limit the number of batches
 
 # Create an APScheduler instance
 scheduler = BlockingScheduler()
@@ -93,8 +93,8 @@ def process_next_batch():
     global all_batches_processed  # Access the global variable
 
         # Print the 20th batch for inspection before making API calls
-    if next_batch_index == 19:
-        print(f"Contents of the 19th batch: {word_batches[next_batch_index]}")
+    if next_batch_index == 115:
+        print(f"Contents of the 189th batch: {word_batches[next_batch_index]}")
         sys.exit()
 
 
@@ -122,7 +122,7 @@ def process_next_batch():
 
 def main():
     # Schedule the process_next_batch function to run at specified intervals
-    scheduler.add_job(process_next_batch, 'interval', seconds=20, id='process_next_batch', max_instances=1)
+    scheduler.add_job(process_next_batch, 'interval', seconds=10, id='process_next_batch', max_instances=1)
 
     # Start the scheduler
     try:

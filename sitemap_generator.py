@@ -28,9 +28,14 @@ def generate_sitemap(words, file_name='sitemap.xml'):
 
     with open(file_name, 'w', encoding='utf-8') as file:
         file.write(sitemap_header + '\n')
+
+        # Add homepage and main search page
+        file.write('  <url>\n    <loc>https://tudiendongnghia.com/</loc>\n    <changefreq>weekly</changefreq>\n  </url>\n')
+        file.write('  <url>\n    <loc>https://tudiendongnghia.com/search</loc>\n    <changefreq>weekly</changefreq>\n  </url>\n')
+    
         for word in words:
             word = word.replace(' ', '-')
-            file.write(f'  <url>\n    <loc>http://tudiendongnghia.com/search/{word}</loc>\n    <changefreq>weekly</changefreq>\n  </url>\n')
+            file.write(f'  <url>\n    <loc>https://tudiendongnghia.com/search/{word}</loc>\n    <changefreq>weekly</changefreq>\n  </url>\n')
         file.write(sitemap_footer)
 
 

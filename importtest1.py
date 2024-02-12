@@ -1,3 +1,4 @@
+#github-action genshdoc
 import sqlite3
 import openai
 import time

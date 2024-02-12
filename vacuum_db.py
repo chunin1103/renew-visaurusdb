@@ -1,3 +1,4 @@
+#github-action genshdoc
 import sqlite3
 
 # Database file path

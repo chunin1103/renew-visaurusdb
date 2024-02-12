@@ -2,6 +2,9 @@ name: Generate Documentation
 
 on: [push]
 
+permissions:
+  contents: write
+  # Add any other permissions required by other steps in your job
 jobs:
   build:
     runs-on: ubuntu-latest

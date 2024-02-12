@@ -1,0 +1,8 @@
+# .readthedocs.yaml
+# Basic Read the Docs configuration file
+
+version: 2
+
+# Define the Python version
+python:
+  version: 3.11

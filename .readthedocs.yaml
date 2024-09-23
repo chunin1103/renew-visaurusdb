@@ -9,4 +9,4 @@ python:
 
 # Build documentation in the "docs/" directory with Sphinx
 sphinx:
-  configuration: ./conf.py
+  configuration: docs/conf.py

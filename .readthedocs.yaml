@@ -6,7 +6,3 @@ version: 2
 # Define the Python version
 python:
   version: 3.11
-
-# Build documentation in the "docs/" directory with Sphinx
-sphinx:
-  configuration: docs/conf.py
